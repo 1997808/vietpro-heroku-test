@@ -1,3 +1,4 @@
 module.exports.login = function (req, res) {
-  res.send("HOME");
+  const a = [0, 1, 2];
+  res.render("test", { a });
 };
