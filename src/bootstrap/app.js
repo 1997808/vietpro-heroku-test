@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.set("views", path.join(__dirname, "..", "apps", "views"));
 app.set("view engine", "ejs");
 
-app.use("/api", require("../routers/api"));
+// app.use("/api", require("../routers/api"));
 app.use("/", require("../routers/web"));
 
 module.exports = app;

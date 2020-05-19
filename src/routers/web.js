@@ -10,6 +10,12 @@ const router = Router();
 
 router.get("/admin/dashboard", AdminController.dashboard);
 
+router
+  .route("/login")
+  .get(AdminController.login)
+  .post(AdminController.postLogin);
+
+// router.get("/admin/product", ProductController.index);
 // router.get("/form", function (req, res) {
 // res.render("test/form", { username: "" });
 // });
