@@ -1,4 +1,12 @@
+const mongoose = require("mongoose");
+
+const Category = mongoose.model("Category");
+
 module.exports.dashboard = function (req, res) {
+  Category.find().exec(function (err, data) {
+    console.log(data);
+  });
+
   res.render("admin/pages/dashboard");
 };
 
