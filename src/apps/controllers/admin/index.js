@@ -1,13 +1,24 @@
 const mongoose = require("mongoose");
 
 const Category = mongoose.model("Category");
+const Product = mongoose.model("Product");
 
-module.exports.dashboard = function (req, res) {
-  Category.find().exec(function (err, data) {
-    console.log(data);
+module.exports.dashboard = async function (req, res) {
+  // Product.find((err, products) => {
+  // Category.find((err, categories) => {
+  // // console.log("Category", data);
+  // res.render("admin/pages/dashboard", { data: { products, categories } });
+  // });
+  // });
+
+  // const products = await Product.find();
+  // const categories = await Category.find();
+
+  await Product.deleteMany({
+    _id: { $in: ["5ec6844a64db9230e57f8e36", "5ec684afc9a69d376669a75d"] },
   });
 
-  res.render("admin/pages/dashboard");
+  res.render("admin/pages/dashboard", { data: {} });
 };
 
 module.exports.login = function (req, res) {
