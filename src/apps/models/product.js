@@ -2,7 +2,10 @@ const mongoose = require("mongoose");
 
 const ProductSchema = new mongoose.Schema(
   {
-    cat_id: mongoose.Schema.ObjectId,
+    cat_id: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Category",
+    },
     prd_name: String,
     prd_image: String,
     prd_price: String,
@@ -16,7 +19,17 @@ const ProductSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toObject: {
+      virtuals: true,
+    },
   }
 );
+
+ProductSchema.virtual("cat", {
+  ref: "Category",
+  localField: "cat_id",
+  foreignField: "_id",
+  justOne: true,
+});
 
 mongoose.model("Product", ProductSchema, "products");
