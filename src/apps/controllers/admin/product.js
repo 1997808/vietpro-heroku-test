@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
-
 const Product = mongoose.model("Product");
+const fs = require("fs");
+const path = require("path");
 
 module.exports.index = async function (req, res) {
-  const page = parseInt(req.query.page);
-  const limit = 1;
+  const page = parseInt(req.query.page || 1);
+  const limit = 10;
 
   const skip = (page - 1) * limit;
 
@@ -48,4 +49,19 @@ module.exports.index = async function (req, res) {
     page,
     totalPages,
   });
+};
+
+module.exports.add = async function (req, res) {
+  res.render("admin/pages/products/add");
+};
+
+module.exports.store = async function (req, res) {
+  const file = req.file;
+  const pathUpload = path.resolve("src", "public", "images", "products");
+
+  const contentFile = fs.readFileSync(file.path);
+  fs.unlinkSync(file.path);
+  fs.writeFileSync(path.join(pathUpload, file.originalname), contentFile);
+
+  res.send("OK");
 };

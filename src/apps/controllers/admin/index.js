@@ -1,15 +1,12 @@
 const mongoose = require("mongoose");
+const fs = require("fs");
+const path = require("path");
 
 const Category = mongoose.model("Category");
 const Product = mongoose.model("Product");
 const User = mongoose.model("User");
 
 module.exports.dashboard = async function (req, res) {
-  const categories = await Category.find({
-    _id: "5db7f9faa9da0856c7a4c631",
-  }).populate("products");
-  console.log("categories", categories);
-
   res.render("admin/pages/dashboard", { data: {} });
 };
 
