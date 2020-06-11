@@ -1,7 +1,10 @@
 const mongoose = require("mongoose");
-const Product = mongoose.model("Product");
 const fs = require("fs");
 const path = require("path");
+const joi = require("@hapi/joi");
+
+const Product = mongoose.model("Product");
+const Category = mongoose.model("Category");
 
 module.exports.index = async function (req, res) {
   const page = parseInt(req.query.page || 1);
@@ -40,6 +43,7 @@ module.exports.index = async function (req, res) {
 
   const products = await Product.find()
     .populate("cat_id")
+    .sort("-_id")
     .limit(limit)
     .skip(skip);
 
@@ -52,7 +56,9 @@ module.exports.index = async function (req, res) {
 };
 
 module.exports.add = async function (req, res) {
-  res.render("admin/pages/products/add");
+  const categories = await Category.find();
+
+  res.render("admin/pages/products/add", { categories });
 };
 
 module.exports.store = async function (req, res) {
@@ -63,5 +69,52 @@ module.exports.store = async function (req, res) {
   fs.unlinkSync(file.path);
   fs.writeFileSync(path.join(pathUpload, file.originalname), contentFile);
 
-  res.send("OK");
+  const bodySchema = joi
+    .object({
+      prd_name: joi.string().required(),
+      prd_price: joi.number().required(),
+    })
+    .unknown();
+
+  const value = await bodySchema.validateAsync(req.body).catch((err) => err);
+
+  if (value instanceof Error) {
+    return res.redirect("/admin/products/add");
+  }
+
+  const product = new Product({
+    prd_name: value.prd_name,
+    cat_id: value.cat_id,
+    prd_image: file.originalname,
+    prd_price: value.prd_price,
+    prd_warranty: value.prd_warranty,
+    prd_accessories: value.prd_accessories,
+    prd_new: value.prd_new,
+    prd_promotion: value.prd_promotion,
+    prd_status: value.prd_status,
+    prd_featured: value.prd_featured,
+    prd_details: value.prd_details,
+  });
+
+  await product.save();
+
+  return res.redirect("/admin/products");
+};
+
+module.exports.destroy = async function (req, res) {
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.redirect("/admin/products");
+  }
+
+  const product = await Product.findByIdAndDelete(id);
+  if (product) {
+    const pathUpload = path.resolve("src", "public", "images", "products");
+    if (fs.existsSync(path.join(pathUpload, product.prd_image))) {
+      fs.unlinkSync(path.join(pathUpload, product.prd_image));
+    }
+  }
+
+  return res.redirect("/admin/products");
 };

@@ -24,6 +24,8 @@ router
 
 router.get("/admin/products", ProductController.index);
 
+router.get("/admin/products/delete/:id", ProductController.destroy);
+
 router
   .route("/admin/products/add")
   .get(ProductController.add)
