@@ -22,8 +22,12 @@ router
   .get(AdminController.login)
   .post(AdminController.postLogin);
 
-router.get("/admin/products", ProductController.index);
+router
+  .route("/admin/products/edit/:id")
+  .get(ProductController.edit)
+  .post(upload.single("prd_image"), ProductController.update);
 
+router.get("/admin/products", ProductController.index);
 router.get("/admin/products/delete/:id", ProductController.destroy);
 
 router

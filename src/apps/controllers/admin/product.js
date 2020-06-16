@@ -101,6 +101,62 @@ module.exports.store = async function (req, res) {
   return res.redirect("/admin/products");
 };
 
+module.exports.edit = async function (req, res) {
+  const { id } = req.params;
+
+  const categories = await Category.find();
+  const product = await Product.findById(id);
+
+  res.render("admin/pages/products/edit", { categories, product });
+};
+
+module.exports.update = async function (req, res) {
+  const { id } = req.params;
+
+  const file = req.file;
+
+  if (file) {
+    const pathUpload = path.resolve("src", "public", "images", "products");
+
+    const contentFile = fs.readFileSync(file.path);
+    fs.unlinkSync(file.path);
+    fs.writeFileSync(path.join(pathUpload, file.originalname), contentFile);
+  }
+
+  const bodySchema = joi
+    .object({
+      prd_name: joi.string().required(),
+      prd_price: joi.number().required(),
+    })
+    .unknown();
+
+  const value = await bodySchema.validateAsync(req.body).catch((err) => err);
+  if (value instanceof Error) {
+    return res.redirect(req.path);
+  }
+
+  const productUpdate = {
+    prd_name: value.prd_name,
+    cat_id: value.cat_id,
+    prd_price: value.prd_price,
+    prd_warranty: value.prd_warranty,
+    prd_accessories: value.prd_accessories,
+    prd_new: value.prd_new,
+    prd_promotion: value.prd_promotion,
+    prd_status: value.prd_status,
+    prd_featured: value.prd_featured,
+    prd_details: value.prd_details,
+  };
+
+  if (file) {
+    productUpdate["prd_image"] = file.originalname;
+  }
+
+  await Product.updateOne({ _id: id }, productUpdate);
+
+  return res.redirect("/admin/products");
+};
+
 module.exports.destroy = async function (req, res) {
   const { id } = req.params;
 
