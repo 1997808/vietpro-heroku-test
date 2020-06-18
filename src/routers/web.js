@@ -1,5 +1,7 @@
 const { Router } = require("express");
 const multer = require("multer");
+const checkLogin = require("../apps/middlewares/check-login");
+const checkLogout = require("../apps/middlewares/check-logout");
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -15,13 +17,15 @@ const upload = multer({
 const { AdminController, ProductController } = require("../apps/controllers");
 const router = Router();
 
-router.get("/admin/dashboard", AdminController.dashboard);
-
 router
   .route("/login")
-  .get(AdminController.login)
-  .post(AdminController.postLogin);
+  .get(checkLogin, AdminController.login)
+  .post(checkLogin, AdminController.postLogin);
 
+router.get("/logout", AdminController.logout);
+
+router.use("/admin", checkLogout);
+router.get("/admin/dashboard", AdminController.dashboard);
 router
   .route("/admin/products/edit/:id")
   .get(ProductController.edit)
@@ -29,7 +33,6 @@ router
 
 router.get("/admin/products", ProductController.index);
 router.get("/admin/products/delete/:id", ProductController.destroy);
-
 router
   .route("/admin/products/add")
   .get(ProductController.add)

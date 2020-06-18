@@ -2,6 +2,14 @@ const express = require("express");
 const app = express();
 const path = require("path");
 const bodyParser = require("body-parser");
+const session = require("express-session");
+
+app.use(
+  session({
+    secret: "vietpro-secret",
+  })
+);
+
 require("../libs/mongo-db");
 
 app.use("/assets", express.static(path.join(__dirname, "..", "public")));

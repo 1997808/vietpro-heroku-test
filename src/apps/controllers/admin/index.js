@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+const { func } = require("@hapi/joi");
 
 const Category = mongoose.model("Category");
 const Product = mongoose.model("Product");
@@ -30,10 +31,16 @@ module.exports.postLogin = async function (req, res) {
   }
 
   if (!error) {
+    req.session.user = user;
     return res.redirect("/admin/dashboard");
   }
 
   res.render("admin/pages/login", {
     error,
   });
+};
+
+module.exports.logout = function (req, res) {
+  req.session.destroy();
+  res.redirect("/login");
 };
