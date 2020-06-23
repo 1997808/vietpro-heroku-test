@@ -14,7 +14,11 @@ const upload = multer({
   }),
 });
 
-const { AdminController, ProductController } = require("../apps/controllers");
+const {
+  AdminController,
+  ProductController,
+  ClientController,
+} = require("../apps/controllers");
 const router = Router();
 
 router
@@ -38,4 +42,5 @@ router
   .get(ProductController.add)
   .post(upload.single("prd_image"), ProductController.store);
 
+router.get("/", ClientController.home);
 module.exports = router;

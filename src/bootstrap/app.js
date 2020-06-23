@@ -12,6 +12,8 @@ app.use(
 
 require("../libs/mongo-db");
 
+app.use(require("../apps/middlewares/share-data"));
+
 app.use("/assets", express.static(path.join(__dirname, "..", "public")));
 
 //Using body parser
