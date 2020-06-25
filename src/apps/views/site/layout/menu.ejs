@@ -3,7 +3,9 @@
     <div id="menu" class="collapse navbar-collapse">
       <ul>
         <% for(let menu of menus) { %>
-        <li class="menu-item"><a href="#"><%= menu.cat_name %></a></li>
+        <li class="menu-item">
+          <a href="/category-<%= menu._id %>"><%= menu.cat_name %></a>
+        </li>
         <% } %>
       </ul>
     </div>

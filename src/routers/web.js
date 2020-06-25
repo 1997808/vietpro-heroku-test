@@ -43,4 +43,7 @@ router
   .post(upload.single("prd_image"), ProductController.store);
 
 router.get("/", ClientController.home);
+router.get("/product-detail-:id", ClientController.productDetail);
+router.get("/category-:id", ClientController.category);
+
 module.exports = router;
