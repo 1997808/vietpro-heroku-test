@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
+const Joi = require("@hapi/joi");
 const ProductModel = mongoose.model("Product");
 const CategoryModel = mongoose.model("Category");
+const CommentModel = mongoose.model("Comment");
 
 exports.home = async function (req, res) {
   const ProductFeatured = await ProductModel.find({ prd_featured: 1 })
@@ -84,4 +86,34 @@ exports.category = async function (req, res) {
     page,
     totalPages,
   });
+};
+
+exports.addComment = async function (req, res) {
+  try {
+    const bodySchema = Joi.object({
+      name: Joi.string().required(),
+      email: Joi.string().email().required(),
+      content: Joi.string().min(10).required(),
+    });
+
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) throw Error("Id not valid");
+
+    const value = await bodySchema.validateAsync(req.body);
+
+    const comment = new CommentModel({
+      prd_id: id,
+      content: value.content,
+      info: {
+        name: value.name,
+        email: value.email,
+      },
+    });
+
+    await comment.save();
+
+    return res.redirect(`/product-detail-${id}`);
+  } catch (error) {
+    console.log(error);
+  }
 };

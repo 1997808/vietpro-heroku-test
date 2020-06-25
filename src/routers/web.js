@@ -18,6 +18,7 @@ const {
   AdminController,
   ProductController,
   ClientController,
+  AjaxController,
 } = require("../apps/controllers");
 const router = Router();
 
@@ -44,6 +45,9 @@ router
 
 router.get("/", ClientController.home);
 router.get("/product-detail-:id", ClientController.productDetail);
+router.post("/product-detail-:id/comments", ClientController.addComment);
 router.get("/category-:id", ClientController.category);
+
+router.post("/ajax/get-comment-product", AjaxController.getComemntForProduct);
 
 module.exports = router;
