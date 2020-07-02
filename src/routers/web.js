@@ -44,9 +44,12 @@ router
   .post(upload.single("prd_image"), ProductController.store);
 
 router.get("/", ClientController.home);
+router.get("/cart", ClientController.cart);
 router.get("/product-detail-:id", ClientController.productDetail);
 router.post("/product-detail-:id/comments", ClientController.addComment);
 router.get("/category-:id", ClientController.category);
+
+router.post("/add-to-cart", ClientController.addToCart);
 
 router.post("/ajax/get-comment-product", AjaxController.getComemntForProduct);
 

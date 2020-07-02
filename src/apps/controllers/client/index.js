@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
+const slug = require("slug");
+
 const ProductModel = mongoose.model("Product");
 const CategoryModel = mongoose.model("Category");
 const CommentModel = mongoose.model("Comment");
@@ -116,4 +118,61 @@ exports.addComment = async function (req, res) {
   } catch (error) {
     console.log(error);
   }
+};
+
+exports.addToCart = async function (req, res, next) {
+  try {
+    const bodySchema = Joi.object({
+      quantity: Joi.number().required(),
+      prd_id: Joi.string().required(),
+      sbm: Joi.string().allow("Mua ngay", "Thêm vào giỏ hàng").required(),
+    });
+
+    const value = await bodySchema.validateAsync(req.body);
+
+    const sbm = slug(value.sbm, { lower: true });
+
+    const product = await ProductModel.findOne({
+      _id: value.prd_id,
+      prd_status: true,
+    });
+
+    if (!product) return res.redirect("/");
+
+    const oldCart = req.session.cart || [];
+
+    let isUpdate = false;
+
+    const newCart = oldCart.map((prd) => {
+      if (prd.id === value.prd_id && !isUpdate) {
+        prd.qty += value.quantity;
+        isUpdate = true;
+      }
+      return prd;
+    });
+
+    if (!isUpdate) newCart.push({ id: value.prd_id, qty: value.quantity });
+
+    req.session.cart = newCart;
+
+    if (sbm === "mua-ngay") {
+      return res.redirect("/cart");
+    }
+    if (sbm === "them-vao-gio-hang") {
+      return res.redirect(`/product-detail-${value.prd_id}`);
+    }
+  } catch (error) {
+    console.log("error", error);
+    next(error);
+  }
+};
+
+exports.cart = async function (req, res) {
+  const cart = req.session.cart || [];
+
+  const ids = cart.map((prd) => prd.id);
+
+  const products = await ProductModel.find({ _id: { $in: ids } });
+
+  res.render("site/cart", { products });
 };
