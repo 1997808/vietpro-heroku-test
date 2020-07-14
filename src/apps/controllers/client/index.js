@@ -1,11 +1,14 @@
 const mongoose = require("mongoose");
 const Joi = require("@hapi/joi");
 const slug = require("slug");
+const moment = require("moment");
 
 const ProductModel = mongoose.model("Product");
 const CategoryModel = mongoose.model("Category");
 const CommentModel = mongoose.model("Comment");
-const { formatPrice } = require("../../../libs/utils");
+const { formatPrice, renderHtml } = require("../../../libs/utils");
+
+const transporter = require("../../../libs/transposter-mail");
 
 exports.home = async function (req, res) {
   const ProductFeatured = await ProductModel.find({ prd_featured: 1 })
@@ -176,4 +179,60 @@ exports.cart = async function (req, res) {
   const products = await ProductModel.find({ _id: { $in: ids } });
 
   res.render("site/cart", { products, formatPrice });
+};
+
+exports.order = async function (req, res, next) {
+  const bodySchema = Joi.object({
+    name: Joi.string().required(),
+    phone: Joi.number().required(),
+    mail: Joi.string().email().required(),
+    add: Joi.string().required(),
+  });
+
+  try {
+    const { name, phone, mail, add } = await bodySchema.validateAsync(req.body);
+    const cart = req.session.cart;
+
+    const ids = cart.map((item) => item.id);
+
+    const products = await ProductModel.find({
+      _id: { $in: ids },
+    });
+
+    const total = cart.reduce((accumulator, item) => {
+      const product = products.find((product) => product.id === item.id);
+      return accumulator + product.prd_price * item.qty;
+    }, 0);
+
+    const html = await renderHtml(req, "email/order", {
+      products,
+      cart,
+      name,
+      phone,
+      mail,
+      add,
+      date: moment().format(),
+      total,
+    });
+
+    await transporter.sendMail({
+      from: '"Vietpro Shop" <mail@gmail.com>',
+      to: mail,
+      subject: "Thong tin don hang",
+      html: html,
+    });
+
+    res.redirect(307, "/cart/order-success");
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.orderSuccess = async function (req, res, next) {
+  try {
+    req.session.cart = [];
+    res.render("site/success");
+  } catch (error) {
+    next(error);
+  }
 };

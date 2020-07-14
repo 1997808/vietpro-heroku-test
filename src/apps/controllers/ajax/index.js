@@ -4,7 +4,7 @@ const ejs = require("ejs");
 const path = require("path");
 const Joi = require("@hapi/joi");
 const _ = require("lodash");
-const { formatPrice } = require("../../../libs/utils");
+const { formatPrice, renderHtml } = require("../../../libs/utils");
 
 const CommentModel = mongoose.model("Comment");
 const ProductModel = mongoose.model("Product");
@@ -153,11 +153,3 @@ exports.deleteCart = async (req, res, next) => {
     next(error);
   }
 };
-
-async function renderHtml(req, viewName, data) {
-  const viewPath = req.app.get("views");
-  const html = await ejs.renderFile(path.join(viewPath, `${viewName}.ejs`), {
-    ...data,
-  });
-  return html;
-}

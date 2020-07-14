@@ -55,4 +55,7 @@ router.post("/ajax/get-comment-product", AjaxController.getComemntForProduct);
 router.post("/ajax/update-cart", AjaxController.updateCart);
 router.post("/ajax/delete-cart", AjaxController.deleteCart);
 
+router.post("/cart/order", ClientController.order);
+router.post("/cart/order-success", ClientController.orderSuccess);
+
 module.exports = router;
