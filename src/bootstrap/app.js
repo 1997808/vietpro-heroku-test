@@ -3,10 +3,21 @@ const app = express();
 const path = require("path");
 const bodyParser = require("body-parser");
 const session = require("express-session");
+const redisStore = require("connect-redis")(session);
+const redis = require("redis");
 
 app.use(
   session({
     secret: "vietpro-secret",
+    saveUninitialized: true,
+    resave: false,
+    cookie: { secure: false },
+    store: new redisStore({
+      client: redis.createClient({
+        host: "localhost",
+        port: 6379,
+      }),
+    }),
   })
 );
 

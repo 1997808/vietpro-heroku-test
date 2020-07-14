@@ -36,52 +36,8 @@
                 </div>
                 <div class="cart-nav-item col-lg-3 col-md-3 col-sm-12">Giá</div>
               </div>
-              <form method="post">
-                <% let totalPrice = 0 %> <% for (let product of products) { %>
-                <% cart = miniCart.find(item => item.id === product.id) %> <%
-                totalPrice+= (product.prd_price * cart.qty) %>
-                <div class="cart-item row">
-                  <div class="cart-thumb col-lg-7 col-md-7 col-sm-12">
-                    <img
-                      src="/assets/images/products/<%= product.prd_image %>"
-                    />
-                    <h4><%= product.prd_name %></h4>
-                  </div>
-
-                  <div class="cart-quantity col-lg-2 col-md-2 col-sm-12">
-                    <input
-                      type="number"
-                      id="quantity"
-                      class="form-control form-blue quantity"
-                      value="<%= cart.qty %>"
-                      min="1"
-                    />
-                  </div>
-                  <div class="cart-price col-lg-3 col-md-3 col-sm-12">
-                    <b><%= (product.prd_price * cart.qty) %>đ</b
-                    ><a href="#">Xóa</a>
-                  </div>
-                </div>
-                <% } %>
-
-                <div class="row">
-                  <div class="cart-thumb col-lg-7 col-md-7 col-sm-12">
-                    <button
-                      id="update-cart"
-                      class="btn btn-success"
-                      type="submit"
-                      name="sbm"
-                    >
-                      Cập nhật giỏ hàng
-                    </button>
-                  </div>
-                  <div class="cart-total col-lg-2 col-md-2 col-sm-12">
-                    <b>Tổng cộng:</b>
-                  </div>
-                  <div class="cart-price col-lg-3 col-md-3 col-sm-12">
-                    <b><%= totalPrice %>đ</b>
-                  </div>
-                </div>
+              <form method="post" id="cart-list">
+                <%- include("components/list-cart") %>
               </form>
             </div>
             <!--	End Cart	-->
@@ -158,5 +114,81 @@
     <!--	Footer	-->
     <%- include("layout/footer")%>
     <!--	End Footer	-->
+    <script>
+      function renderListCart(data) {
+        if ("success" === data.status) {
+          $("#cart-list").html(data.data.html);
+          $("#total-item").html(data.data.totalItem);
+        }
+      }
+      function deleteCart(id, type) {
+        if (id === "item" || id === "all") {
+          type = id;
+          id = undefined;
+        }
+
+        const isDelete = confirm(
+          `Bạn muốn xóa ${
+            type === "all" ? "toàn bộ giỏ hàng" : "sản phẩm này khỏi giỏ hàng"
+          }`
+        );
+        if (!isDelete) return isDelete;
+
+        $.ajax({
+          method: "POST",
+          data: {
+            type: type,
+            id: id,
+          },
+          url: "/ajax/delete-cart",
+        }).done(renderListCart);
+        return isDelete;
+      }
+      function updateCart(e) {}
+
+      $(document).ready(function () {
+        $(document).on("blur", "input.quantity", function (e) {
+          const self = $(this);
+          const id = self.data("id");
+
+          const qty = self.val();
+
+          if (qty <= 0) {
+            return;
+          }
+
+          $.ajax({
+            method: "POST",
+            url: "/ajax/update-cart",
+            data: {
+              id: id,
+              qty: qty,
+            },
+          }).done(renderListCart);
+        });
+
+        $(document).on("change", "input.quantity", function (e) {
+          const self = $(this);
+          const qty = self.val();
+          const id = self.data("id");
+
+          if (qty <= 0 && !deleteCart(id, "item")) {
+            self.val(1);
+          }
+        });
+
+        $(document).on("click", "#delete-cart-all", function (e) {
+          e.preventDefault();
+          deleteCart("all");
+        });
+
+        $(document).on("click", "a.delete-cart-item", function (e) {
+          e.preventDefault();
+          const self = $(this);
+          const id = self.data("id");
+          deleteCart(id, "item");
+        });
+      });
+    </script>
   </body>
 </html>

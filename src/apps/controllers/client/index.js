@@ -5,6 +5,7 @@ const slug = require("slug");
 const ProductModel = mongoose.model("Product");
 const CategoryModel = mongoose.model("Category");
 const CommentModel = mongoose.model("Comment");
+const { formatPrice } = require("../../../libs/utils");
 
 exports.home = async function (req, res) {
   const ProductFeatured = await ProductModel.find({ prd_featured: 1 })
@@ -174,5 +175,5 @@ exports.cart = async function (req, res) {
 
   const products = await ProductModel.find({ _id: { $in: ids } });
 
-  res.render("site/cart", { products });
+  res.render("site/cart", { products, formatPrice });
 };

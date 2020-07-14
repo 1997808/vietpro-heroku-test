@@ -52,5 +52,7 @@ router.get("/category-:id", ClientController.category);
 router.post("/add-to-cart", ClientController.addToCart);
 
 router.post("/ajax/get-comment-product", AjaxController.getComemntForProduct);
+router.post("/ajax/update-cart", AjaxController.updateCart);
+router.post("/ajax/delete-cart", AjaxController.deleteCart);
 
 module.exports = router;

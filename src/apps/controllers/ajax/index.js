@@ -1,7 +1,13 @@
 const mongoose = require("mongoose");
-const CommentModel = mongoose.model("Comment");
+
 const ejs = require("ejs");
 const path = require("path");
+const Joi = require("@hapi/joi");
+const _ = require("lodash");
+const { formatPrice } = require("../../../libs/utils");
+
+const CommentModel = mongoose.model("Comment");
+const ProductModel = mongoose.model("Product");
 
 exports.getComemntForProduct = async (req, res) => {
   const { id } = req.body;
@@ -60,3 +66,98 @@ exports.getComemntForProduct = async (req, res) => {
     },
   });
 };
+
+exports.updateCart = async (req, res, next) => {
+  const bodySchema = Joi.object({
+    id: Joi.string().required(),
+    qty: Joi.number().required(),
+  });
+
+  try {
+    const value = await bodySchema.validateAsync(req.body);
+
+    const { id, qty } = value;
+    const cart = _.cloneDeep(req.session.cart || []);
+
+    const newCart = cart.map((item) => {
+      if (item.id === id) {
+        item.qty = qty;
+      }
+
+      return item;
+    });
+
+    req.session.cart = newCart;
+    const ids = newCart.map((prd) => prd.id);
+    const products = await ProductModel.find({ _id: { $in: ids } });
+
+    const html = await renderHtml(req, "site/components/list-cart", {
+      products,
+      miniCart: newCart,
+      formatPrice,
+    });
+
+    const totalItem = newCart.reduce((a, c) => a + c.qty, 0);
+
+    res.json({
+      status: "success",
+      data: {
+        html: html,
+        totalItem,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteCart = async (req, res, next) => {
+  const bodySchema = Joi.object({
+    type: Joi.string().allow("item", "all").default("all"),
+    id: Joi.string(),
+  });
+
+  try {
+    const { type, id } = await bodySchema.validateAsync(req.body);
+    let newCart;
+
+    if (type === "all") {
+      req.session.cart = newCart = [];
+    }
+    if (type === "item" && mongoose.Types.ObjectId.isValid(id)) {
+      const cart = _.cloneDeep(req.session.cart || []);
+      newCart = cart.filter((item) => item.id !== id);
+      req.session.cart = newCart;
+    }
+
+    const ids = newCart.map((prd) => prd.id);
+    const products = ids.length
+      ? await ProductModel.find({ _id: { $in: ids } })
+      : [];
+
+    const html = await renderHtml(req, "site/components/list-cart", {
+      products,
+      miniCart: newCart,
+      formatPrice,
+    });
+
+    const totalItem = newCart.reduce((a, c) => a + c.qty, 0);
+    res.json({
+      status: "success",
+      data: {
+        html: html,
+        totalItem,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+async function renderHtml(req, viewName, data) {
+  const viewPath = req.app.get("views");
+  const html = await ejs.renderFile(path.join(viewPath, `${viewName}.ejs`), {
+    ...data,
+  });
+  return html;
+}
