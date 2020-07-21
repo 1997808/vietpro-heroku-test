@@ -2,6 +2,7 @@ const { Router } = require("express");
 const multer = require("multer");
 const checkLogin = require("../apps/middlewares/check-login");
 const checkLogout = require("../apps/middlewares/check-logout");
+const Joi = require("@hapi/joi");
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -20,6 +21,7 @@ const {
   ClientController,
   AjaxController,
 } = require("../apps/controllers");
+const { func } = require("@hapi/joi");
 const router = Router();
 
 router
@@ -57,5 +59,20 @@ router.post("/ajax/delete-cart", AjaxController.deleteCart);
 
 router.post("/cart/order", ClientController.order);
 router.post("/cart/order-success", ClientController.orderSuccess);
+
+router.get("/error", async function (req, res, next) {
+  const bodySchema = Joi.object({
+    a: Joi.string().required(),
+  });
+  try {
+    const value = await bodySchema.validateAsync({ a: "10" });
+
+    if (value.a !== 10) {
+      throw new Error("a is not aqua 10");
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

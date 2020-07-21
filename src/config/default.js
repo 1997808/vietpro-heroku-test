@@ -1,14 +1,14 @@
 module.exports = {
   app: {
-    PORT: 3000,
+    PORT: process.env.PORT,
   },
   mail: {
-    host: "smtp.gmail.com",
-    port: 587,
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
     secure: false,
     auth: {
-      user: "vietpro.shop28",
-      pass: "pxjgwzcxskdurssf",
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
     },
   },
 };

@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "./node_modules/.bin/cross-env NODE_CONFIG_DIR=./src/config ./node_modules/.bin/nodemon ./src/bin/www",
-    "start": "node ./src/bin/www"
+    "dev": "./node_modules/.bin/cross-env NODE_CONFIG_DIR=./src/config ./node_modules/.bin/nodemon --exec \"node -r dotenv/config ./src/bin/www dotenv_config_path=.env.dev\"",
+    "start": "./node_modules/.bin/cross-env NODE_CONFIG_DIR=./src/config node -r dotenv/config ./src/bin/www dotenv_config_path=.env"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +16,7 @@
     "config": "^3.3.1",
     "connect-redis": "^4.0.4",
     "cross-env": "^7.0.2",
+    "dotenv": "^8.2.0",
     "ejs": "^3.1.2",
     "express": "^4.17.1",
     "express-session": "^1.17.1",

@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const redisStore = require("connect-redis")(session);
 const redis = require("redis");
+const { func } = require("@hapi/joi");
 
 app.use(
   session({
@@ -20,6 +21,8 @@ app.use(
     }),
   })
 );
+
+// console.log(process.env);
 
 require("../libs/mongo-db");
 
@@ -37,5 +40,17 @@ app.set("view engine", "ejs");
 
 // app.use("/api", require("../routers/api"));
 app.use("/", require("../routers/web"));
+
+app.use("*", function (req, res) {
+  return res.render("404");
+});
+
+app.use((error, req, res, next) => {
+  console.log("error", error.message);
+  return res.json({
+    status: "error",
+    message: error.message,
+  });
+});
 
 module.exports = app;
