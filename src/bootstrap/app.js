@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const redisStore = require("connect-redis")(session);
 const redis = require("redis");
-const { func } = require("@hapi/joi");
+const config = require("config");
 
 app.use(
   session({
@@ -14,10 +14,7 @@ app.use(
     resave: false,
     cookie: { secure: false },
     store: new redisStore({
-      client: redis.createClient({
-        host: "localhost",
-        port: 6379,
-      }),
+      client: redis.createClient(config.get("redis")),
     }),
   })
 );
