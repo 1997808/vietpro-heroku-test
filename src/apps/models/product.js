@@ -6,7 +6,10 @@ const ProductSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "Category",
     },
-    prd_name: String,
+    prd_name: {
+      type: String,
+      text: true,
+    },
     prd_image: String,
     prd_price: String,
     prd_warranty: String,
